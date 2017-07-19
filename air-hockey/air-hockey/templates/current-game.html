@@ -1,0 +1,44 @@
+<html>
+<head>
+  <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css' rel='stylesheet' integrity='sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==' crossorigin='anonymous'>
+  <link href="{{ url_for('static', filename='games.css') }}" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='js/current-game.js') }}"></script>
+</head>
+<body>
+  <div class="container-fluid current">
+    <div class="row">
+
+      <div id="player1" class="player col-sm-6">
+        <span class="name">
+        </span>
+        <span class="score">
+
+        </span>
+      </div>
+      <div id="player2" class="player col-sm-6">
+        <span class="name">
+        </span>
+        <span class="score">
+
+        </span>
+      </div>
+    </div>
+    <div id="length-box">Game to 7</div>
+    <div class="overlay">
+    </div>
+    <div id="countdown">
+      <div class="btn btn-default" id="player1scored">player 1</div>
+      <div class="btn btn-default" id="player2scored">player 2</div>
+    </div>
+    <div class="row buttons">
+      <!-- <div class="col-sm-6"> -->
+        <button id="replay" class="btn btn-primary">Replay</button>
+      <!-- </div> -->
+      <!-- <div class="col-sm-6"> -->
+        <button id="new_game" class="btn btn-success">New</button>
+      <!-- </div> -->
+    </div>
+  </div>
+</body>
+</html>
