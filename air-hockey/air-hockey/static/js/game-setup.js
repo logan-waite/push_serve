@@ -15,6 +15,8 @@ $(document).ready(function() {
     "game_type" : 0,
     "player1_id": 0,
     "player2_id": 0,
+    "player1_name": "",
+    "player2_name": "",
     "table_ready": 0,
     "guest_ready": 0
   };
@@ -36,6 +38,7 @@ $(document).ready(function() {
         if (game_info.table_ready != 1) {
           $("#start").removeClass("disabled");
           $("#start").addClass("disabled");
+          $('#guest').removeClass("disabled").addClass("disabled");
         }
         else {
           $("#start").removeClass("disabled");
@@ -59,6 +62,8 @@ $(document).ready(function() {
     localStorage.setItem("game_length", game_info.game_length);
     localStorage.setItem("player1_id", game_info.player1_id);
     localStorage.setItem("player2_id", game_info.player2_id);
+    localStorage.setItem("player1_name", game_info.player1_name);
+    localStorage.setItem("player2_name", game_info.player2_name);
 
     window.location.href = "/current-game";
   });
@@ -72,6 +77,8 @@ $(document).ready(function() {
     localStorage.setItem("game_length", game_info.game_length);
     localStorage.setItem("player1_id", 0);
     localStorage.setItem("player2_id", 0);
+    localStorage.setItem("player1_name", "Player 1");
+    localStorage.setItem("player2_name", "Player 2");
 
     window.location.href = "/current-game";
   })
@@ -120,6 +127,20 @@ $(document).ready(function() {
     },
   });
 
+
+  function sse() {
+      var source = new EventSource('/stream');
+      source.onmessage = function(e) {
+        console.log(e.data);
+        if (e.data != 1) {
+          console.log("actual message")
+          $('#table-ready').text("Table Ready");
+          $('#table-ready').removeClass("alert-danger").addClass("alert-success");
+          game_info.table_ready = 1;
+          isGameReady();
+        }
+      };
+  }
   // Every 5 seconds, check to make sure the table is ready.
   // the table sends a 0 value to the current_match table, it's fine.
   // setInterval(function() {
@@ -156,9 +177,10 @@ $(document).ready(function() {
       $("#game-ready").text("Players cannot be the same");
       game_info.player1_id = 0;
       game_info.player2_id = 0;
+      game_info.player1_name = "";
+      game_info.player2_name = "";
     }
     else if ($("#player1").val() == 0 || $("#player2").val() == 0) {
-      console.log("one is default")
       if ($("#game-ready").hasClass("alert-danger")) {
         $("#game-ready").removeClass("alert-danger")
       }
@@ -169,18 +191,22 @@ $(document).ready(function() {
       $("#game-ready").text("Game Options Not Yet Selected");
       game_info.player1_id = $("#player1").val();
       game_info.player2_id = $("#player2").val();
+      game_info.player1_name = $('#player1 option:selected').text();
+      game_info.player2_name = $('#player2 option:selected').text();
     }
     else {
       game_info.player1_id = $("#player1").val();
       game_info.player2_id = $("#player2").val();
+      game_info.player1_name = $('#player1 option:selected').text();
+      game_info.player2_name = $('#player2 option:selected').text();
     }
     isGameReady();
-    console.log(game_info);
   })
 
   // Save the game type when a game button is pressed
   // values are 1 = 5pt, 2 = 7pt, 3 = 10pt, 4 = 5min, 5 = 10min
   $(".length-options button").click(function() {
+    debugger;
     switch($(this).val()) {
       case "1":
         game_info.guest_ready = 1;
@@ -218,4 +244,6 @@ $(document).ready(function() {
     $(".length-options button:not(.active)").addClass("deselected");
     isGameReady();
   })
+
+  sse();
 })
