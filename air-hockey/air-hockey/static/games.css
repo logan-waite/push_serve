@@ -123,12 +123,10 @@
   opacity: .9;
 }
 
-.current #countdown {
+.current .overlay-text {
   position: absolute;
-  width: 100%;
-  height: 300px;
   top: 50%;
-  margin-top: -150px;
+  left: 50%;
   color: red;
   font-size: 250px;
   line-height: 100%;
@@ -136,15 +134,48 @@
   vertical-align: middle;
 }
 
-.current .row.buttons {
+.current #countdown {
+  width: 240px;
+  height: 300px;
+  margin-top: -150px;
+  margin-left: -120px;
+}
+
+.current #game-over {
+  width: 500px;
+  height: 350px;
+  margin-top: -175px;
+  margin-left: -250px;
+  font-size: 180px;
+}
+
+.current #end-game {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  text-align: center;
+  font-size: 75px;
+  display: none;
+}
+
+.current #end-game div > div {
+  display: inline-block;
+}
+
+.current #end-game #winner {
+  margin-top: 200px;
+}
+
+.current #end-game .buttons {
   position: absolute;
   bottom: 15%;
   width: 100%;
-  display: none;
   text-align: center;
 }
 
-.current .row.buttons button {
+.current #end-game .buttons button {
   width: 150px;
   height: 150px;
   border-radius: 100px;

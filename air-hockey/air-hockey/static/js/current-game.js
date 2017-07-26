@@ -38,6 +38,7 @@ $(document).ready(function() {
           }
         }
       };
+      return source;
   }
 
   function initializeGame() {
@@ -58,17 +59,22 @@ $(document).ready(function() {
 
   function startTimed() {
     var time_array = [game_length, 0];
+    time_array[0] = 1; // for testing
     $('#length-box').text(time_array[0] + ":" + zeroPad(time_array[1], 2));
     var time_left = $('#length-box').text()
     setTimeout(function() {
       var gameTimer = setInterval(function() {
+        $('#length-box').text(time_array[0] + ":" + zeroPad(time_array[1], 2))
         if (time_array[0] == 0 && time_array[1] == 0) {
-          clearInterval(gametimer)
+          clearInterval(gameTimer)
           gameOver();
         }
-        if (time_array[1] == 0) {
+        else if (time_array[1] == 0) {
           time_array[0] -= 1;
-          time_array[1] == 59;
+          time_array[1] = 59;
+        }
+        else {
+          time_array[1] -= 1;
         }
       }, 1000)
     }, 4000)
@@ -92,45 +98,63 @@ $(document).ready(function() {
     }, 1000);
   }
 
+  $('#replay').click(function() {
+    window.location.reload();
+  })
+
+  $('#new_game').click(function() {
+    window.location.href="/"
+  })
+
+  initializeGame();
+  // We kinda want to run this after everything else to make sure
+  // Everyhting is ready.
+  var event_source = sse();
+
   function gameOver() {
-    $('#countdown').text("Game Over").css("font-size", "180px").css("top", "48%");
-    // $('.overlay').show();
-    $('#countdown').show();
+    event_source.close();
+    $('#game-over').text("Game Over");
+    $('.overlay').css("opacity", ".9").show();
+    $('#game-over').show();
     var player1_score = $('#player1 .score').text();
     var player2_score = $('#player2 .score').text();
+    var player1_name = $('#player1 .name').text();
+    var player2_name = $('#player2 .name').text();
+    var winner = {name: "", score: 0}
+    var loser = {name: "", score: 0}
+
+    if (player1_score >= player2_score) {
+      winner.name = player1_name;
+      winner.score = player1_score;
+      loser.name = player2_name;
+      loser.score = player2_score;
+    }
+    else {
+      winner.name = player2_name;
+      winner.score = player2_score;
+      loser.name = player1_name;
+      loser.score = player1_score;
+    }
     var data = {}
     data['p1_id'] = player1_id;
     data['p2_id'] = player2_id;
     data['p1_score'] = player1_score;
     data['p2_score'] = player2_score;
     var dataJSON = JSON.stringify(data);
-    // $.ajax({
-    //   url: '/api/air-hockey/add-match',
-    //   method: "POST",
-    //   data: dataJSON,
-    //   complete: function(result) {
-    //     $.ajax({
-    //       method: "GET",
-    //       url: "/api/update-game/clear-game/"
-    //     })
-    //     console.log(result);
-    //   },
-    //   error: function(error) {
-    //     console.log(error);
-    //   }
-    // })
+    $.ajax({
+      url: "/end-game",
+      method: "POST",
+      data: dataJSON
+    })
+
     setTimeout(function() {
-      $('.buttons').show();
+      $('#winner-name').text(winner.name);
+      $('#winner-score').text(winner.score);
+      $('#loser-name').text(loser.name);
+      $('#loser-score').text(loser.score);
+      $('#game-over').hide();
+      $('#end-game').show();
     }, 2000)
 
   }
-
-
-
-
-
-  initializeGame();
-  // We kinda want to run this after everything else to make sure
-  // Everyhting is ready.
-  sse();
 })

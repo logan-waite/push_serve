@@ -133,7 +133,6 @@ $(document).ready(function() {
       source.onmessage = function(e) {
         console.log(e.data);
         if (e.data != 1) {
-          console.log("actual message")
           $('#table-ready').text("Table Ready");
           $('#table-ready').removeClass("alert-danger").addClass("alert-success");
           game_info.table_ready = 1;
@@ -206,7 +205,6 @@ $(document).ready(function() {
   // Save the game type when a game button is pressed
   // values are 1 = 5pt, 2 = 7pt, 3 = 10pt, 4 = 5min, 5 = 10min
   $(".length-options button").click(function() {
-    debugger;
     switch($(this).val()) {
       case "1":
         game_info.guest_ready = 1;
