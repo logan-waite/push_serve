@@ -136,6 +136,7 @@ $(document).ready(function() {
           $('#table-ready').text("Table Ready");
           $('#table-ready').removeClass("alert-danger").addClass("alert-success");
           game_info.table_ready = 1;
+          source.close();
           isGameReady();
         }
       };

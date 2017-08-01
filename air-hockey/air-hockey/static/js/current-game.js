@@ -114,12 +114,12 @@ $(document).ready(function() {
   function gameOver() {
     event_source.close();
     $('#game-over').text("Game Over");
-    $('.overlay').css("opacity", ".9").show();
+    $('.overlay').css("opacity", "1").show();
     $('#game-over').show();
-    var player1_score = $('#player1 .score').text();
-    var player2_score = $('#player2 .score').text();
-    var player1_name = $('#player1 .name').text();
-    var player2_name = $('#player2 .name').text();
+    var player1_score = $('#player1 .score').text().trim();
+    var player2_score = $('#player2 .score').text().trim();
+    var player1_name = $('#player1 .name').text().trim();
+    var player2_name = $('#player2 .name').text().trim();
     var winner = {name: "", score: 0}
     var loser = {name: "", score: 0}
 
@@ -140,6 +140,7 @@ $(document).ready(function() {
     data['p2_id'] = player2_id;
     data['p1_score'] = player1_score;
     data['p2_score'] = player2_score;
+    console.log(player2_score)
     var dataJSON = JSON.stringify(data);
     $.ajax({
       url: "/end-game",
