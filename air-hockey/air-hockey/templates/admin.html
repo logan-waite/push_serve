@@ -17,11 +17,9 @@
           </h1>
           <div id="players">
             <ul class="list-group">
-              <li class="list-group-item player">Player 1</li>
-              <li class="list-group-item player">Player 2</li>
-              <li class="list-group-item player">Player 3</li>
-              <li class="list-group-item player">Player 4</li>
-              <li class="list-group-item player">Player 5</li>
+              {% for player_id, name in players.items() %}
+              <li class="list-group-item player" data-player-id="{{ player_id }}">{{ name }}</li>
+              {% endfor %}
             </ul>
           </div>
         </section>
@@ -32,11 +30,12 @@
           </h1>
           <div id="matches">
             <ul class="list-group">
-              <li class="list-group-item match">Match 1</li>
-              <li class="list-group-item match">Match 2</li>
-              <li class="list-group-item match">Match 3</li>
-              <li class="list-group-item match">Match 4</li>
-              <li class="list-group-item match">Match 5</li>
+              {% for match_id, match_tuple in matches.items() %}
+              <li class="list-group-item match">
+                {{ match_tuple[0][0] }} &mdash; {{ match_tuple[0][1] }} <br>
+                {{ match_tuple[1][0] }} &mdash; {{ match_tuple[1][1] }}
+              </li>
+              {% endfor %}
             </ul>
           </div>
         </section>

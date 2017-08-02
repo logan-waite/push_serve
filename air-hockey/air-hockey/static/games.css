@@ -41,6 +41,11 @@ body {
   vertical-align: middle;
 }
 
+.admin section .list-group {
+  overflow-y: auto;
+  height: 85%;
+}
+
 .admin section .list-group .list-group-item {
   font-size: 20px;
 }
@@ -49,6 +54,10 @@ body {
   margin-right: 10px;
   vertical-align: middle;
   line-height: 28px;
+}
+
+.modal-body .error {
+  display: none;
 }
 
 /****************/

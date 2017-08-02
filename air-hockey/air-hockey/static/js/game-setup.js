@@ -7,6 +7,7 @@ $(document).ready(function() {
   localStorage.setItem("game_length", 0);
   localStorage.setItem("player1_id", 0);
   localStorage.setItem("player2_id", 0);
+  localStorage.setItem("guest", false);
 
   // Set up the game info object.
   // when that's full, the game can start.
@@ -79,6 +80,7 @@ $(document).ready(function() {
     localStorage.setItem("player2_id", 0);
     localStorage.setItem("player1_name", "Player 1");
     localStorage.setItem("player2_name", "Player 2");
+    localStorage.setItem("guest", true);
 
     window.location.href = "/current-game";
   })

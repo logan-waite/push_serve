@@ -2,6 +2,8 @@ import datetime
 import flask
 import redis
 import sqlite3
+import collections
+from operator import itemgetter
 
 # TODO: Save match results to a database
 # TODO: Create leaderboard
@@ -32,9 +34,13 @@ def stream():
                           mimetype="text/event-stream")
 
 # Page for setting up the game
+# This needs a list of players
 @app.route('/')
 def home():
-    return flask.render_template('game-setup.html')
+    cur.execute("SELECT player_id, name FROM Players")
+    db_players = cur.fetchall()
+    players = collections.OrderedDict(db_players)
+    return flask.render_template('game-setup.html', players=players)
 
 # When we receive a score for the table, publish it to the channel
 # so anybody listening can hear.
@@ -57,43 +63,55 @@ def current():
 @app.route('/end-game', methods=["POST"])
 def end():
     if flask.request.method == "POST":
-        # make sure if the match is a guest match, we don't save it
         pubsub.unsubscribe("scores")
-        addMatch(flask.request)
+        # make sure if the match is a guest match, we don't save it
+        if not flask.request.form.get('guest'):
+            addMatch(flask_request=flask.request)
         return flask.Response(status=200)
 
 # Admin page for players and matches
 @app.route('/admin')
 def admin():
-    return flask.render_template('admin.html')
+    # Get list of players
+    cur.execute("SELECT player_id, name FROM Players")
+    db_players = cur.fetchall()
+    players = collections.OrderedDict(db_players)
+    # Get list of matches
+    cur.execute("""SELECT m.match_id, p1.name AS p1_name, p2.name AS p2_name, m.p1_score, m.p2_score
+                    FROM Matches m
+                    JOIN Players p1 ON p1.player_id = m.p1_id
+                    JOIN Players p2 ON p2.player_id = m.p2_id""")
+    db_matches = cur.fetchall();
+    matches = {}
+    for match in db_matches:
+        matches[match[0]] = [(match[1], match[3]), (match[2], match[4])]
+    matches = collections.OrderedDict(reversed(list(matches.items())))
+    return flask.render_template('admin.html', players=players, matches=matches)
 
 # Call to add a player. All that's needed is name
 @app.route('/admin/add-player', methods=["PUT"])
 def addPlayer():
-    print(flask.request.form)
     name = flask.request.form["name"]
-    print(name)
-    cur.execute('INSERT OR IGNORE INTO Players (name, ranking) VALUES ( ?, NULL )', ( name ) )
+    cur.execute('INSERT OR IGNORE INTO Players (name, ranking) VALUES ( ?, NULL )', ( name, ) )
     conn.commit()
     return flask.Response(status=200)
 
 # Call to add a match, both manually and at the end of a game
 @app.route("/admin/add-match", methods=["PUT"])
-def addMatch(flask_request):
+def addMatch(flask_request=None):
     if flask.request.method == "PUT":
         flask_request = flask.request
-    p1_id = flask_request.form["p1_id"]
-    p2_id = flask_request.form["p2_id"]
-    p1_score = flask_request.form["p1_score"]
-    p2_score = flask_request.form["p2_score"]
-
+    p1_id = flask_request.form.get("p1_id")
+    p2_id = flask_request.form.get("p2_id")
+    p1_score = flask_request.form.get("p1_score")
+    p2_score = flask_request.form.get("p2_score")
     cur.execute("""INSERT OR IGNORE INTO Matches
                     (p1_id, p2_id, p1_score, p2_score)
                     VALUES ( ?, ?, ?, ? )""",
-                     ( p1_id, p2_id, p1_score, p2_score ) )
+                     ( p1_id, p2_id, p1_score, p2_score, ) )
     conn.commit()
-    if flask.request.method == "POST":
-        return flask.Reponse(status=200)
+    if flask.request.method == "PUT":
+        return flask.Response(status=200)
     return True
 
 

@@ -27,7 +27,6 @@ $(document).ready(function() {
   function sse() {
       var source = new EventSource('/stream');
       source.onmessage = function(e) {
-        console.log(e.data);
         var scorer = (e.data.split("'"))[1];
         var player_score = "#player" + scorer + " .score";
         var current_score = $(player_score).text()
@@ -140,12 +139,13 @@ $(document).ready(function() {
     data['p2_id'] = player2_id;
     data['p1_score'] = player1_score;
     data['p2_score'] = player2_score;
-    console.log(player2_score)
-    var dataJSON = JSON.stringify(data);
+    if (localStorage.getItem("guest")) {
+      data["guest"] = true;
+    }
     $.ajax({
       url: "/end-game",
       method: "POST",
-      data: dataJSON
+      data: data
     })
 
     setTimeout(function() {
