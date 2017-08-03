@@ -17,8 +17,8 @@
           </h1>
           <div id="players">
             <ul class="list-group">
-              {% for player_id, name in players.items() %}
-              <li class="list-group-item player" data-player-id="{{ player_id }}">{{ name }}</li>
+              {% for player in players %}
+              <li class="list-group-item player" data-player-id="{{ player[0] }}">{{ player[1][0] }} <div class="pull-right">Rank: {{ player[1][1] }}</div></li>
               {% endfor %}
             </ul>
           </div>

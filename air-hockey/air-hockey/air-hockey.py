@@ -19,7 +19,7 @@ conn.text_factory = str
 cur = conn.cursor()
 
 # This keeps track of what is happening with scoring.
-# pubsub.listen keeps track of any changes and then returns them
+# pubsub.listen keeps track of any changes and then returns them when they happen
 def event_stream():
     pubsub.subscribe("scores")
     # TODO: handle client disconnection
@@ -71,12 +71,32 @@ def end():
 # Admin page for players and matches
 @app.route('/admin')
 def admin():
+    # This is just to help limit the number of connections to Redis
+    pubsub.unsubscribe("scores")
     # Get list of players
-    cur.execute("SELECT player_id, name FROM Players")
+    cur.execute("SELECT player_id, name, weight FROM Players")
     db_players = cur.fetchall()
-    players = collections.OrderedDict(db_players)
+    # We need to figure out the ranking first, so sort by weight
+    sorted_players = sorted(db_players, key=lambda player:player[2], reverse=True)
+    # Then replace the weight with an int denoting rank
+    rank = 1
+    ranked_players = []
+    for player in sorted_players:
+        player = (player[0], player[1], rank)
+        rank += 1
+        ranked_players.append(player)
+    ordered_players = sorted(ranked_players, key=lambda player:player[1])
+    # We need a list of tuples, with the first item being the id and
+    # the second item being a tuple of name and rank
+    players = []
+    for player in ordered_players:
+        ranked_player = ( player[0], ( player[1], player[2] ) )
+        players.append( ranked_player )
+
+    # players = collections.OrderedDict(db_players)
+    print(players)
     # Get list of matches
-    cur.execute("""SELECT m.match_id, p1.name AS p1_name, p2.name AS p2_name, m.p1_score, m.p2_score
+    cur.execute(""" SELECT m.match_id, p1.name AS p1_name, p2.name AS p2_name, m.p1_score, m.p2_score
                     FROM Matches m
                     JOIN Players p1 ON p1.player_id = m.p1_id
                     JOIN Players p2 ON p2.player_id = m.p2_id""")
@@ -96,6 +116,7 @@ def addPlayer():
     return flask.Response(status=200)
 
 # Call to add a match, both manually and at the end of a game
+# Also run algorithm to update rankings
 @app.route("/admin/add-match", methods=["PUT"])
 def addMatch(flask_request=None):
 
@@ -178,14 +199,13 @@ def getPlayerWeight(player):
     # Pull out the player's weights
     for match in db_matches:
         if match[0] == p_id:
-            weights.append(int(match[2]) if match[2] is not None else 0)
+            weights.append(float(match[2]) if match[2] is not None else 0)
         elif match[1] == p_id:
-            weights.append(int(match[3]) if match[3] is not None else 0)
+            weights.append(float(match[3]) if match[3] is not None else 0)
     # Find the average
     p_weight =  sum(weights)/len(weights)
 
-    print("p_weight: " + str(p_weight))
-    print("p wins: " + str(player["wins"]))
+    print(sum(weights))
 
     cur.execute(""" UPDATE Players
                     SET weight = ?, wins = ?
